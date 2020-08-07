@@ -4,9 +4,7 @@
   "description": "[GitHub Repository](https://github.com/josephptflanagan/200809-Employee-Tracker)",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
-    "migrate": "sqlite3 db/election.db < db/schema.db",
-    "seed": "sqlite3 db/election.db < db/seed.db"
+    "test": "jest"
   },
   "repository": {
     "type": "git",
