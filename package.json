@@ -1,0 +1,25 @@
+{
+  "name": "200809-Employee-Tracker",
+  "version": "1.0.0",
+  "description": "[GitHub Repository](https://github.com/josephptflanagan/200809-Employee-Tracker)",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "migrate": "sqlite3 db/election.db < db/schema.db",
+    "seed": "sqlite3 db/election.db < db/seed.db"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/josephptflanagan/200809-Employee-Tracker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/josephptflanagan/200809-Employee-Tracker/issues"
+  },
+  "homepage": "https://github.com/josephptflanagan/200809-Employee-Tracker#readme",
+  "dependencies": {
+    "jest": "^26.2.2"
+  }
+}
