@@ -47,7 +47,7 @@ const mainMenuPrompt = [
       'Add a Department',
       'Add a Role',
       'Add an Employee',
-      'Update and Employee Roll',
+      'Update an Employee Role',
       'Exit Program']
   }
 ];
@@ -164,14 +164,30 @@ const addEmployeePrompt = [
     message: "What is the id number for this employee's manager? (enter nothing for managers)"
   }
 ]
+
+const updateEmployeePrompt = [
+  {
+    //EMPLOYEE ID
+    type: 'input',
+    name: 'employee_id',
+    message: "What is the id number for the employee that is changing rolls?"
+  },
+  {
+    //NEW ROLE ID
+    type: 'input',
+    name: 'role_id',
+    message: "What is the new role id number for the employee that is changing rolls?"
+  }
+]
 //END PROMPTS
 
 //getQuery
 const getQuery = (section) => {
   connection.query(section, (err, res) => {
     if (err) throw err;
-    console.log('\n')
+    console.log('\n');
     console.table(res);
+    console.log('\n');
   });
 }
 
@@ -219,6 +235,22 @@ const postQuery = (section, data) => {
     default:
       console.log("ERROR")
   }
+}
+
+//updateQuery
+const updateQuery = (data) => {
+  connection.query(`UPDATE employees SET ? WHERE ?`,
+  [
+    {
+      role_id: data["role_id"],
+    },
+    {
+      id: data['employee_id'],
+    }
+  ],
+  function (err, res) {
+    if (err) throw err;
+  });
 }
 
 //initializes database interface
@@ -281,12 +313,17 @@ const mainMenu = async () => {
       getQuery(allEmployees);
       break;
 
-    case "Update and Employee Roll":
-      //console.log("Update and Employee Roll.")
+    case "Update an Employee Role":
+      //console.log("Update and Employee Role.")
+      let employeeUpdateRoleData = await inquirer.prompt(updateEmployeePrompt);
+      updateQuery(employeeUpdateRoleData);
+      getQuery(allEmployees);
       break;
+
     case "Exit Program":
       console.log("Thank you, and have a great day!")
       break;
+
     default:
       console.log("ERROR, UNKNOWN COMMAND.")
 
