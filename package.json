@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "start": "npm run ./index.js"
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -20,6 +20,8 @@
   "homepage": "https://github.com/josephptflanagan/200809-Employee-Tracker#readme",
   "dependencies": {
     "inquirer": "^7.3.3",
-    "jest": "^26.2.2"
-  }
+    "jest": "^26.2.2",
+    "mysql2": "^2.1.0"
+  },
+  "devDependencies": {}
 }
