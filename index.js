@@ -1,7 +1,7 @@
 //import inquirer
 const inquirer = require("inquirer");
 const header = require("./utils/Header");
-const {allDepts, allRoles, allEmployees} = require("./utils/Query");
+const { allDepts, allRoles, allEmployees } = require("./utils/QueryBodies");
 const mysql = require('mysql2');
 
 // Create the connection to database
@@ -54,7 +54,7 @@ const mainMenuPrompt = [
 
 const addDepartmentPrompt = [
   {
-    //NAME
+    //DEPARTMENT NAME
     type: 'input',
     name: 'name',
     message: 'What is the name of this department? (Required)',
@@ -69,9 +69,9 @@ const addDepartmentPrompt = [
   }
 ]
 
-let addRolePrompt = [
+const addRolePrompt = [
   {
-    //NAME
+    //ROLE NAME
     type: 'input',
     name: 'name',
     message: 'What is the name of this role? (Required)',
@@ -85,7 +85,7 @@ let addRolePrompt = [
     }
   },
   {
-    //NAME
+    //ROLE SALARY
     type: 'input',
     name: 'salary',
     message: 'What is the salary of this role? (Required)',
@@ -99,7 +99,7 @@ let addRolePrompt = [
     }
   },
   {
-    //NAME
+    //DEPARTMENT ID
     type: 'input',
     name: 'deptId',
     message: 'What is the id number of the department of this role? (Required)',
@@ -113,7 +113,113 @@ let addRolePrompt = [
     }
   }
 ]
+
+const addEmployeePrompt = [
+  {
+    //EMPLOYEE FIRST NAME
+    type: 'input',
+    name: 'first_name',
+    message: 'What is the first name of this employee? (Required)',
+    validate: name => {
+      if (name) {
+        return true;
+      } else {
+        console.log('A first name is required to proceed');
+        return false;
+      }
+    }
+  },
+  {
+    //EMPLOYEE LAST NAME
+    type: 'input',
+    name: 'last_name',
+    message: 'What is the last name of this employee? (Required)',
+    validate: name => {
+      if (name) {
+        return true;
+      } else {
+        console.log('A last name is required to proceed');
+        return false;
+      }
+    }
+  },
+  {
+    //EMPLOYEE ROLE ID
+    type: 'input',
+    name: 'role_id',
+    message: 'What is the role id number this employee? (Required)',
+    validate: name => {
+      if (name) {
+        return true;
+      } else {
+        console.log('A role id is required to proceed');
+        return false;
+      }
+    }
+  },
+  {
+    //EMPLOYEE MANAGER ID
+    type: 'input',
+    name: 'manager_id',
+    message: "What is the id number for this employee's manager? (enter nothing for managers)"
+  }
+]
 //END PROMPTS
+
+//getQuery
+const getQuery = (section) => {
+  connection.query(section, (err, res) => {
+    if (err) throw err;
+    console.log('\n')
+    console.table(res);
+  });
+}
+
+//postQuery
+const postQuery = (section, data) => {
+
+  switch (section) {
+    case 'addDept':
+      connection.query(`
+      INSERT INTO departments(dept_name)
+      VALUES ('${data["name"]}')
+      `, (err, res) => {
+        if (err) throw err;
+      });
+      break;
+
+    case 'addRole':
+      connection.query(`
+      INSERT INTO roles (job_title, salary, department_id)
+       VALUES ('${data["name"]}', '${ data["salary"]}', '${data["deptId"]}')
+       `, (err, res) => {
+        if (err) throw err;
+      });
+      break;
+
+    case 'addEmployee':
+      if (data['manager_id'] != '') {
+        connection.query(`
+        INSERT INTO employees (first_name, last_name, role_id, manager_id)
+        VALUES ('${data["first_name"]}', '${data["last_name"]}', '${data["role_id"]}', '${data['manager_id']}')
+        `, (err, res) => {
+          if (err) throw err;
+        });
+      }
+      else {
+        connection.query(`
+        INSERT INTO employees (first_name, last_name, role_id, manager_id)
+        VALUES ('${data["first_name"]}', '${data["last_name"]}', '${data["role_id"]}', null)
+        `, (err, res) => {
+          if (err) throw err;
+        });
+      }
+      break;
+
+    default:
+      console.log("ERROR")
+  }
+}
 
 //initializes database interface
 const programInitiation = (choice) => {
@@ -140,77 +246,41 @@ const mainMenu = async () => {
   switch (choice) {
     case "View all Departments":
       //console.log("View all Departments.")
-      connection.query(allDepts, (err, res) => {
-        if (err) throw err;
-        console.log('\n')
-        console.table(res);
-      });
+      getQuery(allDepts);
       break;
+
     case "View all Roles":
       //console.log("View all Roles.")
-      connection.query(allRoles, (err, res) => {
-        if (err) throw err;
-        console.log('\n')
-        console.table(res);
-      });
+      getQuery(allRoles);
       break;
+
     case "View all Employees":
       //console.log("View all Employees.")
-      connection.query(allEmployees, (err, res) => {
-        if (err) throw err;
-        console.log('\n')
-        console.table(res);
-      });
+      getQuery(allEmployees)
       break;
+
     case "Add a Department":
       //console.log("Add a Department.")
-      let deptName = await inquirer.prompt(addDepartmentPrompt);
-      deptName = deptName['name'];
-      //console.log(deptName);
-      connection.query(`
-      INSERT INTO departments(dept_name)
-      VALUES ('${deptName}')
-      `, (err, res) => {
-        if (err) throw err;
-        console.log('\n')
-        console.log(res);
-      });
-      connection.query(`
-      SELECT * FROM departments
-      `, (err, res) => {
-        if (err) throw err;
-        console.log('\n')
-        console.table(res);
-      });
+      let deptData = await inquirer.prompt(addDepartmentPrompt);
+      postQuery('addDept', deptData);
+      getQuery(allDepts);
       break;
+
     case "Add a Role":
       //console.log("Add a Role.")
-
       let roleData = await inquirer.prompt(addRolePrompt);
-      roleName = roleData['name'];
-      roleSalary = roleData['salary'];
-      roleDeptId = roleData['deptId'];
-      console.log(roleData);
-     
-      connection.query(`
-      INSERT INTO roles (job_title, salary, department_id)
-       VALUES ('${roleName}', '${roleSalary}', '${roleDeptId}')
-       `, (err, res) => {
-        if (err) throw err;
-        console.log('\n')
-        console.log(res);
-      });
-      
-      connection.query(allRoles, (err, res) => {
-        if (err) throw err;
-        console.log('\n')
-        console.table(res);
-      });
-
+      postQuery('addRole', roleData);
+      getQuery(allRoles);
       break;
+
     case "Add an Employee":
       //console.log("Add an Employee.")
+      let employeeData = await inquirer.prompt(addEmployeePrompt);
+      //console.log(employeeData);
+      postQuery('addEmployee', employeeData);
+      getQuery(allEmployees);
       break;
+
     case "Update and Employee Roll":
       //console.log("Update and Employee Roll.")
       break;

@@ -25,5 +25,4 @@ LEFT JOIN departments on roles.department_id = departments.id
 LEFT JOIN employees manager on manager.id = employees.manager_id;
 `;
 
-
 module.exports = {allDepts:allDepts, allRoles:allRoles, allEmployees:allEmployees};
