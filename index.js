@@ -102,7 +102,15 @@ const mainMenu = async () => {
       break;
     case "View all Roles":
       //console.log("View all Roles.")
-      connection.query(`SELECT * FROM roles`, (err, res) => {
+      connection.query(`
+      SELECT
+      roles.id,
+      roles.job_title,
+      roles.salary,
+      departments.dept_name AS department
+      FROM roles
+      LEFT JOIN departments on roles.department_id = departments.id
+      `, (err, res) => {
         if (err) throw err;
         console.log('\n')
         console.table(res);
@@ -134,10 +142,7 @@ const mainMenu = async () => {
       let deptName = await inquirer.prompt(addDepartmentPrompt);
       deptName = deptName['name'];
       console.log(deptName);
-      connection.query(`INSERT INTO departments SET ?`,
-        {
-          name: deptName
-        }, (err, res) => {
+      connection.query(`INSERT INTO departments(dept_name) VALUES ('${deptName}')`, (err, res) => {
           if (err) throw err;
           console.log('\n')
           console.log(res.affectedRows);
