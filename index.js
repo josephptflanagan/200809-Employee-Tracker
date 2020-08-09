@@ -1,6 +1,7 @@
 //import inquirer
 const inquirer = require("inquirer");
 const header = require("./utils/Header");
+const {allDepts, allRoles, allEmployees} = require("./utils/Query");
 const mysql = require('mysql2');
 
 // Create the connection to database
@@ -67,6 +68,51 @@ const addDepartmentPrompt = [
     }
   }
 ]
+
+let addRolePrompt = [
+  {
+    //NAME
+    type: 'input',
+    name: 'name',
+    message: 'What is the name of this role? (Required)',
+    validate: name => {
+      if (name) {
+        return true;
+      } else {
+        console.log('A role name is required to proceed');
+        return false;
+      }
+    }
+  },
+  {
+    //NAME
+    type: 'input',
+    name: 'salary',
+    message: 'What is the salary of this role? (Required)',
+    validate: name => {
+      if (name) {
+        return true;
+      } else {
+        console.log('A role salary is required to proceed');
+        return false;
+      }
+    }
+  },
+  {
+    //NAME
+    type: 'input',
+    name: 'deptId',
+    message: 'What is the id number of the department of this role? (Required)',
+    validate: name => {
+      if (name) {
+        return true;
+      } else {
+        console.log('A department id is required to proceed');
+        return false;
+      }
+    }
+  }
+]
 //END PROMPTS
 
 //initializes database interface
@@ -94,7 +140,7 @@ const mainMenu = async () => {
   switch (choice) {
     case "View all Departments":
       //console.log("View all Departments.")
-      connection.query(`SELECT * FROM departments`, (err, res) => {
+      connection.query(allDepts, (err, res) => {
         if (err) throw err;
         console.log('\n')
         console.table(res);
@@ -102,15 +148,7 @@ const mainMenu = async () => {
       break;
     case "View all Roles":
       //console.log("View all Roles.")
-      connection.query(`
-      SELECT
-      roles.id,
-      roles.job_title,
-      roles.salary,
-      departments.dept_name AS department
-      FROM roles
-      LEFT JOIN departments on roles.department_id = departments.id
-      `, (err, res) => {
+      connection.query(allRoles, (err, res) => {
         if (err) throw err;
         console.log('\n')
         console.table(res);
@@ -118,20 +156,7 @@ const mainMenu = async () => {
       break;
     case "View all Employees":
       //console.log("View all Employees.")
-      connection.query(`
-      SELECT
-      employees.id,
-      employees.first_name,
-      employees.last_name,
-      roles.job_title,
-      departments.dept_name AS department,
-      roles.salary,
-      CONCAT(manager.first_name, ' ', manager.last_name) AS manager
-      FROM employees
-      LEFT JOIN roles on employees.role_id = roles.id
-      LEFT JOIN departments on roles.department_id = departments.id
-      LEFT JOIN employees manager on manager.id = employees.manager_id;
-      `, (err, res) => {
+      connection.query(allEmployees, (err, res) => {
         if (err) throw err;
         console.log('\n')
         console.table(res);
@@ -141,15 +166,47 @@ const mainMenu = async () => {
       //console.log("Add a Department.")
       let deptName = await inquirer.prompt(addDepartmentPrompt);
       deptName = deptName['name'];
-      console.log(deptName);
-      connection.query(`INSERT INTO departments(dept_name) VALUES ('${deptName}')`, (err, res) => {
-          if (err) throw err;
-          console.log('\n')
-          console.log(res.affectedRows);
-        });
+      //console.log(deptName);
+      connection.query(`
+      INSERT INTO departments(dept_name)
+      VALUES ('${deptName}')
+      `, (err, res) => {
+        if (err) throw err;
+        console.log('\n')
+        console.log(res);
+      });
+      connection.query(`
+      SELECT * FROM departments
+      `, (err, res) => {
+        if (err) throw err;
+        console.log('\n')
+        console.table(res);
+      });
       break;
     case "Add a Role":
       //console.log("Add a Role.")
+
+      let roleData = await inquirer.prompt(addRolePrompt);
+      roleName = roleData['name'];
+      roleSalary = roleData['salary'];
+      roleDeptId = roleData['deptId'];
+      console.log(roleData);
+     
+      connection.query(`
+      INSERT INTO roles (job_title, salary, department_id)
+       VALUES ('${roleName}', '${roleSalary}', '${roleDeptId}')
+       `, (err, res) => {
+        if (err) throw err;
+        console.log('\n')
+        console.log(res);
+      });
+      
+      connection.query(allRoles, (err, res) => {
+        if (err) throw err;
+        console.log('\n')
+        console.table(res);
+      });
+
       break;
     case "Add an Employee":
       //console.log("Add an Employee.")
