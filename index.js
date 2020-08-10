@@ -11,16 +11,18 @@ const connection = mysql.createConnection({
   // Your MySQL username
   user: 'root',
   // Your MySQL password
-  password: 'Juno625@36ms',
+  password: 'XXXXXXXXX',
   database: 'company'
 });
 
+//connect to the database
 connection.connect(err => {
   if (err) throw err;
   console.log('connected as id ' + connection.threadId);
   afterConnection();
 });
 
+//Once the connection is established, initiate database management
 afterConnection = () => {
 
   //starts the database interface
@@ -29,8 +31,6 @@ afterConnection = () => {
     .catch(err => {
       console.log(err);
     })
-
-
 
 };
 
@@ -195,7 +195,7 @@ const getQuery = (section) => {
 const postQuery = (section, data) => {
 
   switch (section) {
-    case 'addDept':
+    case 'addDept'://add department
       connection.query(`
       INSERT INTO departments(dept_name)
       VALUES ('${data["name"]}')
@@ -204,7 +204,7 @@ const postQuery = (section, data) => {
       });
       break;
 
-    case 'addRole':
+    case 'addRole'://add role
       connection.query(`
       INSERT INTO roles (job_title, salary, department_id)
        VALUES ('${data["name"]}', '${ data["salary"]}', '${data["deptId"]}')
@@ -213,8 +213,8 @@ const postQuery = (section, data) => {
       });
       break;
 
-    case 'addEmployee':
-      if (data['manager_id'] != '') {
+    case 'addEmployee'://add employee
+      if (data['manager_id'] != '') {//with manager
         connection.query(`
         INSERT INTO employees (first_name, last_name, role_id, manager_id)
         VALUES ('${data["first_name"]}', '${data["last_name"]}', '${data["role_id"]}', '${data['manager_id']}')
@@ -222,7 +222,7 @@ const postQuery = (section, data) => {
           if (err) throw err;
         });
       }
-      else {
+      else {//without manager
         connection.query(`
         INSERT INTO employees (first_name, last_name, role_id, manager_id)
         VALUES ('${data["first_name"]}', '${data["last_name"]}', '${data["role_id"]}', null)
@@ -256,7 +256,7 @@ const updateQuery = (data) => {
 //initializes database interface
 const programInitiation = (choice) => {
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {//unless user chooses to leave, run
     if (choice != "Exit Program") {
       mainMenu();
     }
@@ -328,6 +328,7 @@ const mainMenu = async () => {
       console.log("ERROR, UNKNOWN COMMAND.")
 
   }
+  //continue loop with choice
   programInitiation(choice);
 };
 
